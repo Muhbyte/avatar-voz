@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Avatar de Voz PT‑BR</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #2e004f, #7b2cbf);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex; align-items: center;
+      justify-content: center;
+      height: 100vh; margin: 0;
+      text-align: center;
+    }
+    .box {
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 600px;
+    }
+    h1 { margin-bottom: 20px; font-size: 2.2rem; }
+    textarea {
+      width: 100%; height: 120px;
+      border-radius: 8px; border: none;
+      padding: 12px; font-size: 1rem;
+      resize: vertical;
+    }
+    .controls {
+      margin-top: 15px;
+    }
+    button {
+      padding: 10px 18px;
+      font-size: 1rem;
+      margin: 0 5px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: rgba(255,255,255,0.4); }
+    audio {
+      margin-top: 20px; width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Avatar de Voz PT‑BR</h1>
+    <textarea id="texto" placeholder="Digite o que quiser..."></textarea>
+    <div class="controls">
+      <button onclick="falarTexto()">🔊 Falar</button>
+    </div>
+    <audio id="audio" controls></audio>
+  </div>
+
+  <script>
+    const apiKey = 'sk_443730fb6b8ab6009dd23bbcf2d66406595e7765474bf76f';
+    const voiceId = 'x6uRgOliu4lpcrqMH3s1'; // Flavio Francisco (PT‑BR)
+
+    async function falarTexto() {
+      const t = document.getElementById("texto");
+      const audio = document.getElementById("audio");
+      const texto = t.value.trim();
+      if (!texto) return;
+
+      t.value = "";
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        method: "POST",
+        headers: {
+          "xi-api-key": apiKey,
+          "Content-Type": "application/json",
+          "Accept": "audio/mpeg"
+        },
+        body: JSON.stringify({
+          text: texto,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: { stability: 0.5, similarity_boost: 0.7 }
+        })
+      });
+
+      if (!res.ok) {
+        alert("Erro ao gerar áudio.");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      audio.src = url;
+      audio.play();
+    }
+
+    document.getElementById("texto")
+      .addEventListener("keypress", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          falarTexto();
+        }
+      });
+  </script>
+</body>
+</html>
